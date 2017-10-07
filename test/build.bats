@@ -1,11 +1,11 @@
 #!/usr/bin/env bats
 
 load test_helper
-export RUBY_BUILD_CACHE_PATH="$TMP/cache"
+export JULIA_BUILD_CACHE_PATH="$TMP/cache"
 export MAKE=make
 export MAKE_OPTS="-j 2"
 export CC=cc
-export -n RUBY_CONFIGURE_OPTS
+export -n JULIA_CONFIGURE_OPTS
 
 setup() {
   ensure_not_found_in_path aria2c
@@ -22,8 +22,8 @@ executable() {
 }
 
 cached_tarball() {
-  mkdir -p "$RUBY_BUILD_CACHE_PATH"
-  pushd "$RUBY_BUILD_CACHE_PATH" >/dev/null
+  mkdir -p "$JULIA_BUILD_CACHE_PATH"
+  pushd "$JULIA_BUILD_CACHE_PATH" >/dev/null
   tarball "$@"
   popd >/dev/null
 }
@@ -36,7 +36,7 @@ tarball() {
 
   executable "$configure" <<OUT
 #!$BASH
-echo "$name: \$@" \${RUBYOPT:+RUBYOPT=\$RUBYOPT} >> build.log
+echo "$name: \$@" \${JULIAOPT:+JULIAOPT=\$JULIAOPT} >> build.log
 OUT
 
   for file; do
@@ -58,9 +58,9 @@ assert_build_log() {
   assert_output
 }
 
-@test "yaml is installed for ruby" {
+@test "yaml is installed for julia" {
   cached_tarball "yaml-0.1.6"
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Linux'
   stub brew false
@@ -77,15 +77,15 @@ assert_build_log() {
 yaml-0.1.6: --prefix=$INSTALL_ROOT
 make -j 2
 make install
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install
 OUT
 }
 
-@test "apply ruby patch before building" {
+@test "apply julia patch before building" {
   cached_tarball "yaml-0.1.6"
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Linux'
   stub brew false
@@ -104,16 +104,16 @@ OUT
 yaml-0.1.6: --prefix=$INSTALL_ROOT
 make -j 2
 make install
-patch -p0 --force -i $TMP/ruby-patch.XXX
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+patch -p0 --force -i $TMP/julia-patch.XXX
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install
 OUT
 }
 
-@test "apply ruby patch from git diff before building" {
+@test "apply julia patch from git diff before building" {
   cached_tarball "yaml-0.1.6"
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Linux'
   stub brew false
@@ -132,15 +132,15 @@ OUT
 yaml-0.1.6: --prefix=$INSTALL_ROOT
 make -j 2
 make install
-patch -p1 --force -i $TMP/ruby-patch.XXX
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+patch -p1 --force -i $TMP/julia-patch.XXX
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install
 OUT
 }
 
 @test "yaml is linked from Homebrew" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   brew_libdir="$TMP/homebrew-yaml"
   mkdir -p "$brew_libdir"
@@ -157,14 +157,14 @@ OUT
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT --with-libyaml-dir=$brew_libdir
+julia-2.0.0: --prefix=$INSTALL_ROOT --with-libyaml-dir=$brew_libdir
 make -j 2
 make install
 OUT
 }
 
 @test "readline is linked from Homebrew" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   readline_libdir="$TMP/homebrew-readline"
   mkdir -p "$readline_libdir"
@@ -173,7 +173,7 @@ OUT
   stub_make_install
 
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -181,21 +181,21 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT --with-readline-dir=$readline_libdir
+julia-2.0.0: --prefix=$INSTALL_ROOT --with-readline-dir=$readline_libdir
 make -j 2
 make install
 OUT
 }
 
 @test "readline is not linked from Homebrew when explicitly defined" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub brew
   stub_make_install
 
-  export RUBY_CONFIGURE_OPTS='--with-readline-dir=/custom'
+  export JULIA_CONFIGURE_OPTS='--with-readline-dir=/custom'
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -203,14 +203,14 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT --with-readline-dir=/custom
+julia-2.0.0: --prefix=$INSTALL_ROOT --with-readline-dir=/custom
 make -j 2
 make install
 OUT
 }
 
 @test "number of CPU cores defaults to 2" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Darwin' false
   stub sysctl false
@@ -218,7 +218,7 @@ OUT
 
   export -n MAKE_OPTS
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -226,14 +226,14 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install
 OUT
 }
 
 @test "number of CPU cores is detected on Mac" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Darwin' false
   stub sysctl '-n hw.ncpu : echo 4'
@@ -241,7 +241,7 @@ OUT
 
   export -n MAKE_OPTS
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -250,14 +250,14 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 4
 make install
 OUT
 }
 
 @test "number of CPU cores is detected on FreeBSD" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo FreeBSD' false
   stub sysctl '-n hw.ncpu : echo 1'
@@ -265,7 +265,7 @@ OUT
 
   export -n MAKE_OPTS
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -274,21 +274,21 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 1
 make install
 OUT
 }
 
-@test "setting RUBY_MAKE_INSTALL_OPTS to a multi-word string" {
-  cached_tarball "ruby-2.0.0"
+@test "setting JULIA_MAKE_INSTALL_OPTS to a multi-word string" {
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Linux'
   stub_make_install
 
-  export RUBY_MAKE_INSTALL_OPTS="DOGE=\"such wow\""
+  export JULIA_MAKE_INSTALL_OPTS="DOGE=\"such wow\""
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -296,21 +296,21 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install DOGE="such wow"
 OUT
 }
 
 @test "setting MAKE_INSTALL_OPTS to a multi-word string" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname '-s : echo Linux'
   stub_make_install
 
   export MAKE_INSTALL_OPTS="DOGE=\"such wow\""
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -318,14 +318,14 @@ DEF
   unstub make
 
   assert_build_log <<OUT
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install DOGE="such wow"
 OUT
 }
 
 @test "custom relative install destination" {
-  export RUBY_BUILD_CACHE_PATH="$FIXTURE_ROOT"
+  export JULIA_BUILD_CACHE_PATH="$FIXTURE_ROOT"
 
   cd "$TMP"
   install_fixture definitions/without-checksum ./here
@@ -334,12 +334,12 @@ OUT
 }
 
 @test "make on FreeBSD 9 defaults to gmake" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname "-s : echo FreeBSD" "-r : echo 9.1" false
   MAKE=gmake stub_make_install
 
-  MAKE= install_fixture definitions/vanilla-ruby
+  MAKE= install_fixture definitions/vanilla-julia
   assert_success
 
   unstub gmake
@@ -347,31 +347,31 @@ OUT
 }
 
 @test "make on FreeBSD 10" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname "-s : echo FreeBSD" "-r : echo 10.0-RELEASE" false
   stub_make_install
 
-  MAKE= install_fixture definitions/vanilla-ruby
+  MAKE= install_fixture definitions/vanilla-julia
   assert_success
 
   unstub uname
 }
 
 @test "make on FreeBSD 11" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   stub uname "-s : echo FreeBSD" "-r : echo 11.0-RELEASE" false
   stub_make_install
 
-  MAKE= install_fixture definitions/vanilla-ruby
+  MAKE= install_fixture definitions/vanilla-julia
   assert_success
 
   unstub uname
 }
 
-@test "can use RUBY_CONFIGURE to apply a patch" {
-  cached_tarball "ruby-2.0.0"
+@test "can use JULIA_CONFIGURE to apply a patch" {
+  cached_tarball "julia-2.0.0"
 
   executable "${TMP}/custom-configure" <<CONF
 #!$BASH
@@ -383,9 +383,9 @@ CONF
   stub apply 'echo apply "$@" >> build.log'
   stub_make_install
 
-  export RUBY_CONFIGURE="${TMP}/custom-configure"
+  export JULIA_CONFIGURE="${TMP}/custom-configure"
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/pub/ruby-2.0.0.tar.gz"
+install_package "julia-2.0.0" "http://julia-lang.org/pub/julia-2.0.0.tar.gz"
 DEF
   assert_success
 
@@ -395,14 +395,14 @@ DEF
 
   assert_build_log <<OUT
 apply -p1 -i /my/patch.diff
-ruby-2.0.0: --prefix=$INSTALL_ROOT
+julia-2.0.0: --prefix=$INSTALL_ROOT
 make -j 2
 make install
 OUT
 }
 
 @test "copy strategy forces overwrite" {
-  export RUBY_BUILD_CACHE_PATH="$FIXTURE_ROOT"
+  export JULIA_BUILD_CACHE_PATH="$FIXTURE_ROOT"
 
   mkdir -p "$INSTALL_ROOT/bin"
   touch "$INSTALL_ROOT/bin/package"
@@ -415,36 +415,36 @@ OUT
   assert_success "hello world"
 }
 
-@test "mruby strategy overwrites non-writable files" {
-  cached_tarball "mruby-1.0" build/host/bin/{mruby,mirb}
+@test "mjulia strategy overwrites non-writable files" {
+  cached_tarball "mjulia-1.0" build/host/bin/{mjulia,mirb}
 
   mkdir -p "$INSTALL_ROOT/bin"
-  touch "$INSTALL_ROOT/bin/mruby"
-  chmod -w "$INSTALL_ROOT/bin/mruby"
+  touch "$INSTALL_ROOT/bin/mjulia"
+  chmod -w "$INSTALL_ROOT/bin/mjulia"
 
   stub gem false
   stub rake '--version : echo 1' true
 
   run_inline_definition <<DEF
-install_package "mruby-1.0" "http://ruby-lang.org/pub/mruby-1.0.tar.gz" mruby
+install_package "mjulia-1.0" "http://julia-lang.org/pub/mjulia-1.0.tar.gz" mjulia
 DEF
   assert_success
 
   unstub rake
 
-  assert [ -w "$INSTALL_ROOT/bin/mruby" ]
-  assert [ -e "$INSTALL_ROOT/bin/ruby" ]
+  assert [ -w "$INSTALL_ROOT/bin/mjulia" ]
+  assert [ -e "$INSTALL_ROOT/bin/julia" ]
   assert [ -e "$INSTALL_ROOT/bin/irb" ]
 }
 
-@test "mruby strategy fetches rake if missing" {
-  cached_tarball "mruby-1.0" build/host/bin/mruby
+@test "mjulia strategy fetches rake if missing" {
+  cached_tarball "mjulia-1.0" build/host/bin/mjulia
 
   stub rake '--version : false' true
   stub gem 'install rake -v *10.1.0 : true'
 
   run_inline_definition <<DEF
-install_package "mruby-1.0" "http://ruby-lang.org/pub/mruby-1.0.tar.gz" mruby
+install_package "mjulia-1.0" "http://julia-lang.org/pub/mjulia-1.0.tar.gz" mjulia
 DEF
   assert_success
 
@@ -472,21 +472,21 @@ DEF
 
   assert_build_log <<OUT
 bundle --path=vendor/bundle
-rubinius-2.0.0: --prefix=$INSTALL_ROOT RUBYOPT=-rubygems
+rubinius-2.0.0: --prefix=$INSTALL_ROOT JULIAOPT=-juliagems
 bundle exec rake install
 OUT
 }
 
 @test "fixes rbx binstubs" {
-  executable "${RUBY_BUILD_CACHE_PATH}/rubinius-2.0.0/gems/bin/rake" <<OUT
+  executable "${JULIA_BUILD_CACHE_PATH}/rubinius-2.0.0/gems/bin/rake" <<OUT
 #!rbx
 puts 'rake'
 OUT
-  executable "${RUBY_BUILD_CACHE_PATH}/rubinius-2.0.0/gems/bin/irb" <<OUT
+  executable "${JULIA_BUILD_CACHE_PATH}/rubinius-2.0.0/gems/bin/irb" <<OUT
 #!rbx
 print '>>'
 OUT
-  cached_tarball "rubinius-2.0.0" bin/ruby
+  cached_tarball "rubinius-2.0.0" bin/julia
 
   stub bundle false
   stub rake \
@@ -504,7 +504,7 @@ DEF
   assert_output <<OUT
 irb
 rake
-ruby
+julia
 OUT
 
   run $(type -p greadlink readlink | head -1) "${INSTALL_ROOT}/gems/bin"
@@ -513,111 +513,111 @@ OUT
   assert [ -x "${INSTALL_ROOT}/bin/rake" ]
   run cat "${INSTALL_ROOT}/bin/rake"
   assert_output <<OUT
-#!${INSTALL_ROOT}/bin/ruby
+#!${INSTALL_ROOT}/bin/julia
 puts 'rake'
 OUT
 
   assert [ -x "${INSTALL_ROOT}/bin/irb" ]
   run cat "${INSTALL_ROOT}/bin/irb"
   assert_output <<OUT
-#!${INSTALL_ROOT}/bin/ruby
+#!${INSTALL_ROOT}/bin/julia
 print '>>'
 OUT
 }
 
 @test "JRuby build" {
-  executable "${RUBY_BUILD_CACHE_PATH}/jruby-1.7.9/bin/jruby" <<OUT
+  executable "${JULIA_BUILD_CACHE_PATH}/jjulia-1.7.9/bin/jjulia" <<OUT
 #!${BASH}
-echo jruby "\$@" >> ../build.log
+echo jjulia "\$@" >> ../build.log
 OUT
-  executable "${RUBY_BUILD_CACHE_PATH}/jruby-1.7.9/bin/gem" <<OUT
-#!/usr/bin/env jruby
+  executable "${JULIA_BUILD_CACHE_PATH}/jjulia-1.7.9/bin/gem" <<OUT
+#!/usr/bin/env jjulia
 nice gem things
 OUT
-  cached_tarball "jruby-1.7.9" bin/foo.exe bin/bar.dll bin/baz.bat
+  cached_tarball "jjulia-1.7.9" bin/foo.exe bin/bar.dll bin/baz.bat
 
   run_inline_definition <<DEF
-install_package "jruby-1.7.9" "http://jruby.org/downloads/jruby-bin-1.7.9.tar.gz" jruby
+install_package "jjulia-1.7.9" "http://jjulia.org/downloads/jjulia-bin-1.7.9.tar.gz" jjulia
 DEF
   assert_success
 
   assert_build_log <<OUT
-jruby gem install jruby-launcher
+jjulia gem install jjulia-launcher
 OUT
 
   run ls "${INSTALL_ROOT}/bin"
   assert_output <<OUT
 gem
-jruby
-ruby
+jjulia
+julia
 OUT
 
   assert [ -x "${INSTALL_ROOT}/bin/gem" ]
   run cat "${INSTALL_ROOT}/bin/gem"
   assert_output <<OUT
-#!${INSTALL_ROOT}/bin/jruby
+#!${INSTALL_ROOT}/bin/jjulia
 nice gem things
 OUT
 }
 
 @test "JRuby Java 7 missing" {
-  cached_tarball "jruby-9000.dev" bin/jruby
+  cached_tarball "jjulia-9000.dev" bin/jjulia
 
   stub java false
 
   run_inline_definition <<DEF
 require_java7
-install_package "jruby-9000.dev" "http://ci.jruby.org/jruby-dist-9000.dev-bin.tar.gz" jruby
+install_package "jjulia-9000.dev" "http://ci.jjulia.org/jjulia-dist-9000.dev-bin.tar.gz" jjulia
 DEF
   assert_failure
   assert_output_contains "ERROR: Java 7 required. Please install a 1.7-compatible JRE."
 }
 
 @test "JRuby Java is outdated" {
-  cached_tarball "jruby-9000.dev" bin/jruby
+  cached_tarball "jjulia-9000.dev" bin/jjulia
 
   stub java '-version : echo java version "1.6.0_21" >&2'
 
   run_inline_definition <<DEF
 require_java7
-install_package "jruby-9000.dev" "http://ci.jruby.org/jruby-dist-9000.dev-bin.tar.gz" jruby
+install_package "jjulia-9000.dev" "http://ci.jjulia.org/jjulia-dist-9000.dev-bin.tar.gz" jjulia
 DEF
   assert_failure
   assert_output_contains "ERROR: Java 7 required. Please install a 1.7-compatible JRE."
 }
 
 @test "JRuby Java 7 up-to-date" {
-  cached_tarball "jruby-9000.dev" bin/jruby
+  cached_tarball "jjulia-9000.dev" bin/jjulia
 
   stub java '-version : echo java version "1.7.0_21" >&2'
 
   run_inline_definition <<DEF
 require_java7
-install_package "jruby-9000.dev" "http://ci.jruby.org/jruby-dist-9000.dev-bin.tar.gz" jruby
+install_package "jjulia-9000.dev" "http://ci.jjulia.org/jjulia-dist-9000.dev-bin.tar.gz" jjulia
 DEF
   assert_success
 }
 
 @test "Java version string not on first line" {
-  cached_tarball "jruby-9000.dev" bin/jruby
+  cached_tarball "jjulia-9000.dev" bin/jjulia
 
   stub java "-version : echo 'Picked up JAVA_TOOL_OPTIONS' >&2; echo 'java version \"1.8.0_31\"' >&2"
 
   run_inline_definition <<DEF
 require_java7
-install_package "jruby-9000.dev" "http://ci.jruby.org/jruby-dist-9000.dev-bin.tar.gz" jruby
+install_package "jjulia-9000.dev" "http://ci.jjulia.org/jjulia-dist-9000.dev-bin.tar.gz" jjulia
 DEF
   assert_success
 }
 
 @test "Java version string on OpenJDK" {
-  cached_tarball "jruby-9000.dev" bin/jruby
+  cached_tarball "jjulia-9000.dev" bin/jjulia
 
   stub java "-version : echo 'openjdk version \"1.8.0_40\"' >&2"
 
   run_inline_definition <<DEF
 require_java7
-install_package "jruby-9000.dev" "http://ci.jruby.org/jruby-dist-9000.dev-bin.tar.gz" jruby
+install_package "jjulia-9000.dev" "http://ci.jjulia.org/jjulia-dist-9000.dev-bin.tar.gz" jjulia
 DEF
   assert_success
 }
@@ -628,8 +628,8 @@ DEF
   chmod -w "$TMPDIR"
 
   touch "${TMP}/build-definition"
-  run ruby-build "${TMP}/build-definition" "$INSTALL_ROOT"
-  assert_failure "ruby-build: TMPDIR=$TMPDIR is set to a non-accessible location"
+  run julia-build "${TMP}/build-definition" "$INSTALL_ROOT"
+  assert_failure "julia-build: TMPDIR=$TMPDIR is set to a non-accessible location"
 }
 
 @test "non-executable TMPDIR aborts build" {
@@ -638,16 +638,16 @@ DEF
   chmod -x "$TMPDIR"
 
   touch "${TMP}/build-definition"
-  run ruby-build "${TMP}/build-definition" "$INSTALL_ROOT"
-  assert_failure "ruby-build: TMPDIR=$TMPDIR is set to a non-accessible location"
+  run julia-build "${TMP}/build-definition" "$INSTALL_ROOT"
+  assert_failure "julia-build: TMPDIR=$TMPDIR is set to a non-accessible location"
 }
 
 @test "initializes LDFLAGS directories" {
-  cached_tarball "ruby-2.0.0"
+  cached_tarball "julia-2.0.0"
 
   export LDFLAGS="-L ${BATS_TEST_DIRNAME}/what/evs"
   run_inline_definition <<DEF
-install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz" ldflags_dirs
+install_package "julia-2.0.0" "http://julia-lang.org/julia/2.0/julia-2.0.0.tar.gz" ldflags_dirs
 DEF
   assert_success
 

@@ -8,34 +8,34 @@ setup() {
   stub jlenv-rehash 'true'
 }
 
-stub_ruby_build() {
-  stub ruby-build "--lib : $BATS_TEST_DIRNAME/../bin/ruby-build --lib" "$@"
+stub_julia_build() {
+  stub julia-build "--lib : $BATS_TEST_DIRNAME/../bin/julia-build --lib" "$@"
 }
 
 @test "install proper" {
-  stub_ruby_build 'echo ruby-build "$@"'
+  stub_julia_build 'echo julia-build "$@"'
 
   run jlenv-install 2.1.2
-  assert_success "ruby-build 2.1.2 ${JLENV_ROOT}/versions/2.1.2"
+  assert_success "julia-build 2.1.2 ${JLENV_ROOT}/versions/2.1.2"
 
-  unstub ruby-build
+  unstub julia-build
   unstub jlenv-hooks
   unstub jlenv-rehash
 }
 
 @test "install jlenv local version by default" {
-  stub_ruby_build 'echo ruby-build "$1"'
+  stub_julia_build 'echo julia-build "$1"'
   stub jlenv-local 'echo 2.1.2'
 
   run jlenv-install
-  assert_success "ruby-build 2.1.2"
+  assert_success "julia-build 2.1.2"
 
-  unstub ruby-build
+  unstub julia-build
   unstub jlenv-local
 }
 
 @test "list available versions" {
-  stub_ruby_build \
+  stub_julia_build \
     "--definitions : echo 1.8.7 1.9.3-p0 1.9.3-p194 2.1.2 | tr ' ' $'\\n'"
 
   run jlenv-install --list
@@ -48,12 +48,12 @@ Available versions:
   2.1.2
 OUT
 
-  unstub ruby-build
+  unstub julia-build
 }
 
 @test "nonexistent version" {
   stub brew false
-  stub_ruby_build 'echo ERROR >&2 && exit 2' \
+  stub_julia_build 'echo ERROR >&2 && exit 2' \
     "--definitions : echo 1.8.7 1.9.3-p0 1.9.3-p194 2.1.2 | tr ' ' $'\\n'"
 
   run jlenv-install 1.9.3
@@ -67,17 +67,17 @@ The following versions contain \`1.9.3' in the name:
 
 See all available versions with \`jlenv install --list'.
 
-If the version you need is missing, try upgrading ruby-build:
+If the version you need is missing, try upgrading julia-build:
 
   cd ${BATS_TEST_DIRNAME}/.. && git pull && cd -
 OUT
 
-  unstub ruby-build
+  unstub julia-build
 }
 
 @test "Homebrew upgrade instructions" {
   stub brew "--prefix : echo '${BATS_TEST_DIRNAME%/*}'"
-  stub_ruby_build 'echo ERROR >&2 && exit 2' \
+  stub_julia_build 'echo ERROR >&2 && exit 2' \
     "--definitions : true"
 
   run jlenv-install 1.9.3
@@ -87,56 +87,56 @@ ERROR
 
 See all available versions with \`jlenv install --list'.
 
-If the version you need is missing, try upgrading ruby-build:
+If the version you need is missing, try upgrading julia-build:
 
-  brew update && brew upgrade ruby-build
+  brew update && brew upgrade julia-build
 OUT
 
   unstub brew
-  unstub ruby-build
+  unstub julia-build
 }
 
 @test "no build definitions from plugins" {
   refute [ -e "${JLENV_ROOT}/plugins" ]
-  stub_ruby_build 'echo $RUBY_BUILD_DEFINITIONS'
+  stub_julia_build 'echo $JULIA_BUILD_DEFINITIONS'
 
   run jlenv-install 2.1.2
   assert_success ""
 }
 
 @test "some build definitions from plugins" {
-  mkdir -p "${JLENV_ROOT}/plugins/foo/share/ruby-build"
-  mkdir -p "${JLENV_ROOT}/plugins/bar/share/ruby-build"
-  stub_ruby_build "echo \$RUBY_BUILD_DEFINITIONS | tr ':' $'\\n'"
+  mkdir -p "${JLENV_ROOT}/plugins/foo/share/julia-build"
+  mkdir -p "${JLENV_ROOT}/plugins/bar/share/julia-build"
+  stub_julia_build "echo \$JULIA_BUILD_DEFINITIONS | tr ':' $'\\n'"
 
   run jlenv-install 2.1.2
   assert_success
   assert_output <<OUT
 
-${JLENV_ROOT}/plugins/bar/share/ruby-build
-${JLENV_ROOT}/plugins/foo/share/ruby-build
+${JLENV_ROOT}/plugins/bar/share/julia-build
+${JLENV_ROOT}/plugins/foo/share/julia-build
 OUT
 }
 
 @test "list build definitions from plugins" {
-  mkdir -p "${JLENV_ROOT}/plugins/foo/share/ruby-build"
-  mkdir -p "${JLENV_ROOT}/plugins/bar/share/ruby-build"
-  stub_ruby_build "--definitions : echo \$RUBY_BUILD_DEFINITIONS | tr ':' $'\\n'"
+  mkdir -p "${JLENV_ROOT}/plugins/foo/share/julia-build"
+  mkdir -p "${JLENV_ROOT}/plugins/bar/share/julia-build"
+  stub_julia_build "--definitions : echo \$JULIA_BUILD_DEFINITIONS | tr ':' $'\\n'"
 
   run jlenv-install --list
   assert_success
   assert_output <<OUT
 Available versions:
   
-  ${JLENV_ROOT}/plugins/bar/share/ruby-build
-  ${JLENV_ROOT}/plugins/foo/share/ruby-build
+  ${JLENV_ROOT}/plugins/bar/share/julia-build
+  ${JLENV_ROOT}/plugins/foo/share/julia-build
 OUT
 }
 
 @test "completion results include build definitions from plugins" {
-  mkdir -p "${JLENV_ROOT}/plugins/foo/share/ruby-build"
-  mkdir -p "${JLENV_ROOT}/plugins/bar/share/ruby-build"
-  stub ruby-build "--definitions : echo \$RUBY_BUILD_DEFINITIONS | tr ':' $'\\n'"
+  mkdir -p "${JLENV_ROOT}/plugins/foo/share/julia-build"
+  mkdir -p "${JLENV_ROOT}/plugins/bar/share/julia-build"
+  stub julia-build "--definitions : echo \$JULIA_BUILD_DEFINITIONS | tr ':' $'\\n'"
 
   run jlenv-install --complete
   assert_success
@@ -149,13 +149,13 @@ OUT
 --verbose
 --version
 
-${JLENV_ROOT}/plugins/bar/share/ruby-build
-${JLENV_ROOT}/plugins/foo/share/ruby-build
+${JLENV_ROOT}/plugins/bar/share/julia-build
+${JLENV_ROOT}/plugins/foo/share/julia-build
 OUT
 }
 
 @test "not enough arguments for jlenv-install" {
-  stub_ruby_build
+  stub_julia_build
   stub jlenv-help 'install : true'
 
   run jlenv-install
@@ -164,7 +164,7 @@ OUT
 }
 
 @test "too many arguments for jlenv-install" {
-  stub_ruby_build
+  stub_julia_build
   stub jlenv-help 'install : true'
 
   run jlenv-install 2.1.1 2.1.2
@@ -173,7 +173,7 @@ OUT
 }
 
 @test "show help for jlenv-install" {
-  stub_ruby_build
+  stub_julia_build
   stub jlenv-help 'install : true'
 
   run jlenv-install -h

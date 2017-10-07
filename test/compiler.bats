@@ -5,7 +5,7 @@ export MAKE=make
 export MAKE_OPTS='-j 2'
 export -n CFLAGS
 export -n CC
-export -n RUBY_CONFIGURE_OPTS
+export -n JULIA_CONFIGURE_OPTS
 
 @test "require_gcc on OS X 10.9" {
   stub uname '-s : echo Darwin'
@@ -73,7 +73,7 @@ CON
 
   run_inline_definition <<DEF
 exec 4<&1
-build_package_standard ruby
+build_package_standard julia
 DEF
   assert_success
   assert_output <<OUT

@@ -17,13 +17,13 @@ OUT
   stub jlenv-rehash "echo rehashed"
 
   definition="${TMP}/2.0.0"
-  cat > "$definition" <<<"echo ruby-build"
+  cat > "$definition" <<<"echo julia-build"
   run jlenv-install "$definition"
 
   assert_success
   assert_output <<-OUT
 before: ${JLENV_ROOT}/versions/2.0.0
-ruby-build
+julia-build
 after: 0
 rehashed
 OUT

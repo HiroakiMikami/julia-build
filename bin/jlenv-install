@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Summary: Install a Ruby version using ruby-build
+# Summary: Install a Ruby version using julia-build
 #
 # Usage: jlenv install [-f|-s] [-kpv] <version>
 #        jlenv install [-f|-s] [-kpv] <definition-file>
@@ -11,28 +11,28 @@
 #   -f/--force         Install even if the version appears to be installed already
 #   -s/--skip-existing Skip if the version appears to be installed already
 #
-#   ruby-build options:
+#   julia-build options:
 #
 #   -k/--keep          Keep source tree in $JLENV_BUILD_ROOT after installation
 #                      (defaults to $JLENV_ROOT/sources)
 #   -p/--patch         Apply a patch from stdin before building
 #   -v/--verbose       Verbose mode: print compilation status to stdout
-#   --version          Show version of ruby-build
+#   --version          Show version of julia-build
 #
 # For detailed information on installing Ruby versions with
-# ruby-build, including a list of environment variables for adjusting
-# compilation, see: https://github.com/jlenv/ruby-build#usage
+# julia-build, including a list of environment variables for adjusting
+# compilation, see: https://github.com/jlenv/julia-build#usage
 #
 set -e
 [ -n "$JLENV_DEBUG" ] && set -x
 
-# Add `share/ruby-build/` directory from each jlenv plugin to the list of
+# Add `share/julia-build/` directory from each jlenv plugin to the list of
 # paths where build definitions are looked up.
 shopt -s nullglob
-for plugin_path in "$JLENV_ROOT"/plugins/*/share/ruby-build; do
-  RUBY_BUILD_DEFINITIONS="${RUBY_BUILD_DEFINITIONS}:${plugin_path}"
+for plugin_path in "$JLENV_ROOT"/plugins/*/share/julia-build; do
+  JULIA_BUILD_DEFINITIONS="${JULIA_BUILD_DEFINITIONS}:${plugin_path}"
 done
-export RUBY_BUILD_DEFINITIONS
+export JULIA_BUILD_DEFINITIONS
 shopt -u nullglob
 
 # Provide jlenv completions
@@ -44,11 +44,11 @@ if [ "$1" = "--complete" ]; then
   echo --patch
   echo --verbose
   echo --version
-  exec ruby-build --definitions
+  exec julia-build --definitions
 fi
 
 # Load shared library functions
-eval "$(ruby-build --lib)"
+eval "$(julia-build --lib)"
 
 usage() {
   jlenv-help install 2>/dev/null
@@ -57,7 +57,7 @@ usage() {
 
 definitions() {
   local query="$1"
-  ruby-build --definitions | $(type -p ggrep grep | head -1) -F "$query" || true
+  julia-build --definitions | $(type -p ggrep grep | head -1) -F "$query" || true
 }
 
 indent() {
@@ -97,7 +97,7 @@ for option in "${OPTIONS[@]}"; do
     HAS_PATCH="-p"
     ;;
   "version" )
-    exec ruby-build --version
+    exec julia-build --version
     ;;
   * )
     usage 1 >&2
@@ -157,28 +157,28 @@ if [ -d "${PREFIX}/bin" ]; then
     * ) exit 1 ;;
     esac
   elif [ -n "$SKIP_EXISTING" ]; then
-    # Since we know the ruby version is already installed, and are opting to
+    # Since we know the julia version is already installed, and are opting to
     # not force installation of existing versions, we just `exit 0` here to
     # leave things happy
     exit 0
   fi
 fi
 
-# If JLENV_BUILD_ROOT is set, always pass keep options to ruby-build.
+# If JLENV_BUILD_ROOT is set, always pass keep options to julia-build.
 if [ -n "${JLENV_BUILD_ROOT}" ]; then
-  export RUBY_BUILD_BUILD_PATH="${JLENV_BUILD_ROOT}/${VERSION_NAME}"
+  export JULIA_BUILD_BUILD_PATH="${JLENV_BUILD_ROOT}/${VERSION_NAME}"
   KEEP="-k"
 fi
 
-# Set RUBY_BUILD_CACHE_PATH to $JLENV_ROOT/cache, if the directory
+# Set JULIA_BUILD_CACHE_PATH to $JLENV_ROOT/cache, if the directory
 # exists and the variable is not already set.
-if [ -z "${RUBY_BUILD_CACHE_PATH}" ] && [ -d "${JLENV_ROOT}/cache" ]; then
-  export RUBY_BUILD_CACHE_PATH="${JLENV_ROOT}/cache"
+if [ -z "${JULIA_BUILD_CACHE_PATH}" ] && [ -d "${JLENV_ROOT}/cache" ]; then
+  export JULIA_BUILD_CACHE_PATH="${JLENV_ROOT}/cache"
 fi
 
 # Default JLENV_VERSION to the globally-specified Ruby version. (The
 # REE installer requires an existing Ruby installation to run. An
-# unsatisfied local .ruby-version file can cause the installer to
+# unsatisfied local .julia-version file can cause the installer to
 # fail.)
 export JLENV_VERSION="$(jlenv-global 2>/dev/null || true)"
 
@@ -193,9 +193,9 @@ cleanup() {
 
 trap cleanup SIGINT
 
-# Invoke `ruby-build` and record the exit status in $STATUS.
+# Invoke `julia-build` and record the exit status in $STATUS.
 STATUS=0
-ruby-build $KEEP $VERBOSE $HAS_PATCH "$DEFINITION" "$PREFIX" || STATUS="$?"
+julia-build $KEEP $VERBOSE $HAS_PATCH "$DEFINITION" "$PREFIX" || STATUS="$?"
 
 # Display a more helpful message if the definition wasn't found.
 if [ "$STATUS" == "2" ]; then
@@ -209,10 +209,10 @@ if [ "$STATUS" == "2" ]; then
     echo
     echo "See all available versions with \`jlenv install --list'."
     echo
-    echo -n "If the version you need is missing, try upgrading ruby-build"
+    echo -n "If the version you need is missing, try upgrading julia-build"
     if [ "$here" != "${here#$(brew --prefix 2>/dev/null)}" ]; then
       printf ":\n\n"
-      echo "  brew update && brew upgrade ruby-build"
+      echo "  brew update && brew upgrade julia-build"
     elif [ -d "${here}/.git" ]; then
       printf ":\n\n"
       echo "  cd ${here} && git pull && cd -"

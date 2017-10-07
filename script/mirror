@@ -4,14 +4,14 @@
 #        script/mirror stats
 set -e
 
-eval "$(grep RUBY_BUILD_MIRROR_URL= ./bin/ruby-build | head -1)"
+eval "$(grep JULIA_BUILD_MIRROR_URL= ./bin/julia-build | head -1)"
 
 help_text() {
   sed -ne '/^#/!q;s/.\{1,2\}//;1d;p' < "$0"
 }
 
 test_mirrored() {
-  curl -qsSfIL "$RUBY_BUILD_MIRROR_URL/$1" >/dev/null 2>&1
+  curl -qsSfIL "$JULIA_BUILD_MIRROR_URL/$1" >/dev/null 2>&1
 }
 
 compute_sha2() {
@@ -41,7 +41,7 @@ changed_files() {
 }
 
 potentially_new_packages() {
-  local files="$(changed_files "$1" -- ./share/ruby-build)"
+  local files="$(changed_files "$1" -- ./share/julia-build)"
   [ -n "$files" ] && extract_urls $files
 }
 
@@ -81,7 +81,7 @@ verify() {
 }
 
 stats() {
-  local packages=( $(extract_urls ./share/ruby-build/*) )
+  local packages=( $(extract_urls ./share/julia-build/*) )
   local total="${#packages[@]}"
   local confirmed=0
   local checksum

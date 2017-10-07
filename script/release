@@ -2,7 +2,7 @@
 # Usage: script/release
 #
 # - checks out the master branch
-# - changes version in `bin/ruby-build` to current date
+# - changes version in `bin/julia-build` to current date
 # - commits and tags the change
 # - pushes master + tag to GitHub
 # - opens pull request to update the Homebrew formula
@@ -21,7 +21,7 @@ fi
 
 git checkout -q master
 
-binfile="bin/ruby-build"
+binfile="bin/julia-build"
 new_version="$(date '+%Y%m%d')"
 version_tag="v${new_version}"
 previous_tag="$(git tag | grep '^v' | sort | tail -1)"
@@ -31,16 +31,16 @@ if git diff --quiet "${previous_tag}..HEAD" -- bin share; then
   exit 1
 fi
 
-sed -i.bak -E "s!^(RUBY_BUILD_VERSION=).+!\\1\"${new_version}\"!" "$binfile"
+sed -i.bak -E "s!^(JULIA_BUILD_VERSION=).+!\\1\"${new_version}\"!" "$binfile"
 rm -f "${binfile}.bak"
 
-git commit -m "ruby-build ${new_version}" "$binfile"
+git commit -m "julia-build ${new_version}" "$binfile"
 git tag "$version_tag"
 git push origin master "${version_tag}"
 
-{ echo "ruby-build ${new_version}"
+{ echo "julia-build ${new_version}"
   echo
   git log --no-merges --format='%w(0,0,2)* %B' --reverse "${previous_tag}..HEAD^" -- bin share
 } | hub release create -dF - "$version_tag" || true
 
-script/brew-publish ruby-build jlenv/ruby-build "$version_tag"
+script/brew-publish julia-build jlenv/julia-build "$version_tag"

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Usage: PREFIX=/usr/local ./install.sh
 #
-# Installs ruby-build under $PREFIX.
+# Installs julia-build under $PREFIX.
 
 set -e
 
@@ -12,9 +12,9 @@ if [ -z "${PREFIX}" ]; then
 fi
 
 BIN_PATH="${PREFIX}/bin"
-SHARE_PATH="${PREFIX}/share/ruby-build"
+SHARE_PATH="${PREFIX}/share/julia-build"
 
 mkdir -p "$BIN_PATH" "$SHARE_PATH"
 
 install -p bin/* "$BIN_PATH"
-install -p -m 0644 share/ruby-build/* "$SHARE_PATH"
+install -p -m 0644 share/julia-build/* "$SHARE_PATH"
