@@ -2,10 +2,10 @@
 #
 # Summary: Install a Ruby version using ruby-build
 #
-# Usage: rbenv install [-f|-s] [-kpv] <version>
-#        rbenv install [-f|-s] [-kpv] <definition-file>
-#        rbenv install -l|--list
-#        rbenv install --version
+# Usage: jlenv install [-f|-s] [-kpv] <version>
+#        jlenv install [-f|-s] [-kpv] <definition-file>
+#        jlenv install -l|--list
+#        jlenv install --version
 #
 #   -l/--list          List all available versions
 #   -f/--force         Install even if the version appears to be installed already
@@ -13,29 +13,29 @@
 #
 #   ruby-build options:
 #
-#   -k/--keep          Keep source tree in $RBENV_BUILD_ROOT after installation
-#                      (defaults to $RBENV_ROOT/sources)
+#   -k/--keep          Keep source tree in $JLENV_BUILD_ROOT after installation
+#                      (defaults to $JLENV_ROOT/sources)
 #   -p/--patch         Apply a patch from stdin before building
 #   -v/--verbose       Verbose mode: print compilation status to stdout
 #   --version          Show version of ruby-build
 #
 # For detailed information on installing Ruby versions with
 # ruby-build, including a list of environment variables for adjusting
-# compilation, see: https://github.com/rbenv/ruby-build#usage
+# compilation, see: https://github.com/jlenv/ruby-build#usage
 #
 set -e
-[ -n "$RBENV_DEBUG" ] && set -x
+[ -n "$JLENV_DEBUG" ] && set -x
 
-# Add `share/ruby-build/` directory from each rbenv plugin to the list of
+# Add `share/ruby-build/` directory from each jlenv plugin to the list of
 # paths where build definitions are looked up.
 shopt -s nullglob
-for plugin_path in "$RBENV_ROOT"/plugins/*/share/ruby-build; do
+for plugin_path in "$JLENV_ROOT"/plugins/*/share/ruby-build; do
   RUBY_BUILD_DEFINITIONS="${RUBY_BUILD_DEFINITIONS}:${plugin_path}"
 done
 export RUBY_BUILD_DEFINITIONS
 shopt -u nullglob
 
-# Provide rbenv completions
+# Provide jlenv completions
 if [ "$1" = "--complete" ]; then
   echo --list
   echo --force
@@ -51,7 +51,7 @@ fi
 eval "$(ruby-build --lib)"
 
 usage() {
-  rbenv-help install 2>/dev/null
+  jlenv-help install 2>/dev/null
   [ -z "$1" ] || exit "$1"
 }
 
@@ -88,7 +88,7 @@ for option in "${OPTIONS[@]}"; do
     SKIP_EXISTING=true
     ;;
   "k" | "keep" )
-    [ -n "${RBENV_BUILD_ROOT}" ] || RBENV_BUILD_ROOT="${RBENV_ROOT}/sources"
+    [ -n "${JLENV_BUILD_ROOT}" ] || JLENV_BUILD_ROOT="${JLENV_ROOT}/sources"
     ;;
   "v" | "verbose" )
     VERBOSE="-v"
@@ -111,10 +111,10 @@ unset VERSION_NAME
 
 # The first argument contains the definition to install. If the
 # argument is missing, try to install whatever local app-specific
-# version is specified by rbenv. Show usage instructions if a local
+# version is specified by jlenv. Show usage instructions if a local
 # version is not specified.
 DEFINITION="${ARGUMENTS[0]}"
-[ -n "$DEFINITION" ] || DEFINITION="$(rbenv-local 2>/dev/null || true)"
+[ -n "$DEFINITION" ] || DEFINITION="$(jlenv-local 2>/dev/null || true)"
 [ -n "$DEFINITION" ] || usage 1 >&2
 
 # Define `before_install` and `after_install` functions that allow
@@ -133,7 +133,7 @@ after_install() {
 }
 
 OLDIFS="$IFS"
-IFS=$'\n' scripts=(`rbenv-hooks install`)
+IFS=$'\n' scripts=(`jlenv-hooks install`)
 IFS="$OLDIFS"
 for script in "${scripts[@]}"; do source "$script"; done
 
@@ -141,7 +141,7 @@ for script in "${scripts[@]}"; do source "$script"; done
 # Set VERSION_NAME from $DEFINITION, if it is not already set. Then
 # compute the installation prefix.
 [ -n "$VERSION_NAME" ] || VERSION_NAME="${DEFINITION##*/}"
-PREFIX="${RBENV_ROOT}/versions/${VERSION_NAME}"
+PREFIX="${JLENV_ROOT}/versions/${VERSION_NAME}"
 
 [ -d "${PREFIX}" ] && PREFIX_EXISTS=1
 
@@ -149,7 +149,7 @@ PREFIX="${RBENV_ROOT}/versions/${VERSION_NAME}"
 # the --force option was specified.
 if [ -d "${PREFIX}/bin" ]; then
   if [ -z "$FORCE" ] && [ -z "$SKIP_EXISTING" ]; then
-    echo "rbenv: $PREFIX already exists" >&2
+    echo "jlenv: $PREFIX already exists" >&2
     read -p "continue with installation? (y/N) "
 
     case "$REPLY" in
@@ -164,23 +164,23 @@ if [ -d "${PREFIX}/bin" ]; then
   fi
 fi
 
-# If RBENV_BUILD_ROOT is set, always pass keep options to ruby-build.
-if [ -n "${RBENV_BUILD_ROOT}" ]; then
-  export RUBY_BUILD_BUILD_PATH="${RBENV_BUILD_ROOT}/${VERSION_NAME}"
+# If JLENV_BUILD_ROOT is set, always pass keep options to ruby-build.
+if [ -n "${JLENV_BUILD_ROOT}" ]; then
+  export RUBY_BUILD_BUILD_PATH="${JLENV_BUILD_ROOT}/${VERSION_NAME}"
   KEEP="-k"
 fi
 
-# Set RUBY_BUILD_CACHE_PATH to $RBENV_ROOT/cache, if the directory
+# Set RUBY_BUILD_CACHE_PATH to $JLENV_ROOT/cache, if the directory
 # exists and the variable is not already set.
-if [ -z "${RUBY_BUILD_CACHE_PATH}" ] && [ -d "${RBENV_ROOT}/cache" ]; then
-  export RUBY_BUILD_CACHE_PATH="${RBENV_ROOT}/cache"
+if [ -z "${RUBY_BUILD_CACHE_PATH}" ] && [ -d "${JLENV_ROOT}/cache" ]; then
+  export RUBY_BUILD_CACHE_PATH="${JLENV_ROOT}/cache"
 fi
 
-# Default RBENV_VERSION to the globally-specified Ruby version. (The
+# Default JLENV_VERSION to the globally-specified Ruby version. (The
 # REE installer requires an existing Ruby installation to run. An
 # unsatisfied local .ruby-version file can cause the installer to
 # fail.)
-export RBENV_VERSION="$(rbenv-global 2>/dev/null || true)"
+export JLENV_VERSION="$(jlenv-global 2>/dev/null || true)"
 
 
 # Execute `before_install` hooks.
@@ -207,7 +207,7 @@ if [ "$STATUS" == "2" ]; then
       echo "$candidates" | indent
     fi
     echo
-    echo "See all available versions with \`rbenv install --list'."
+    echo "See all available versions with \`jlenv install --list'."
     echo
     echo -n "If the version you need is missing, try upgrading ruby-build"
     if [ "$here" != "${here#$(brew --prefix 2>/dev/null)}" ]; then
@@ -225,9 +225,9 @@ fi
 # Execute `after_install` hooks.
 for hook in "${after_hooks[@]}"; do eval "$hook"; done
 
-# Run `rbenv-rehash` after a successful installation.
+# Run `jlenv-rehash` after a successful installation.
 if [ "$STATUS" == "0" ]; then
-  rbenv-rehash
+  jlenv-rehash
 else
   cleanup
 fi

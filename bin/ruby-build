@@ -1001,7 +1001,7 @@ build_package_mac_openssl() {
   # Install to a subdirectory since we don't want shims for bin/openssl.
   OPENSSL_PREFIX_PATH="${PREFIX_PATH}/openssl"
 
-  # Put openssl.conf, certs, etc in ~/.rbenv/versions/*/openssl/ssl
+  # Put openssl.conf, certs, etc in ~/.jlenv/versions/*/openssl/ssl
   OPENSSLDIR="${OPENSSLDIR:-$OPENSSL_PREFIX_PATH/ssl}"
 
   # Tell Ruby to use this openssl for its extension.

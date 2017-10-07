@@ -2,24 +2,24 @@
 #
 # Summary: Uninstall a specific Ruby version
 #
-# Usage: rbenv uninstall [-f|--force] <version>
+# Usage: jlenv uninstall [-f|--force] <version>
 #
 #    -f  Attempt to remove the specified version without prompting
 #        for confirmation. If the version does not exist, do not
 #        display an error message.
 #
-# See `rbenv versions` for a complete list of installed versions.
+# See `jlenv versions` for a complete list of installed versions.
 #
 set -e
 
-# Provide rbenv completions
+# Provide jlenv completions
 if [ "$1" = "--complete" ]; then
   echo --force
-  exec rbenv versions --bare
+  exec jlenv versions --bare
 fi
 
 usage() {
-  rbenv-help uninstall 2>/dev/null
+  jlenv-help uninstall 2>/dev/null
   [ -z "$1" ] || exit "$1"
 }
 
@@ -55,21 +55,21 @@ after_uninstall() {
 }
 
 OLDIFS="$IFS"
-IFS=$'\n' scripts=(`rbenv-hooks uninstall`)
+IFS=$'\n' scripts=(`jlenv-hooks uninstall`)
 IFS="$OLDIFS"
 for script in "${scripts[@]}"; do source "$script"; done
 
 
 VERSION_NAME="${DEFINITION##*/}"
-PREFIX="${RBENV_ROOT}/versions/${VERSION_NAME}"
+PREFIX="${JLENV_ROOT}/versions/${VERSION_NAME}"
 
 if [ -z "$FORCE" ]; then
   if [ ! -d "$PREFIX" ]; then
-    echo "rbenv: version \`$VERSION_NAME' not installed" >&2
+    echo "jlenv: version \`$VERSION_NAME' not installed" >&2
     exit 1
   fi
 
-  read -p "rbenv: remove $PREFIX? [yN] "
+  read -p "jlenv: remove $PREFIX? [yN] "
   case "$REPLY" in
   y* | Y* ) ;;
   * ) exit 1 ;;
@@ -80,7 +80,7 @@ for hook in "${before_hooks[@]}"; do eval "$hook"; done
 
 if [ -d "$PREFIX" ]; then
   rm -rf "$PREFIX"
-  rbenv-rehash
+  jlenv-rehash
 fi
 
 for hook in "${after_hooks[@]}"; do eval "$hook"; done

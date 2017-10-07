@@ -10,8 +10,8 @@ load test_helper
   cd usr
 
   assert [ -x bin/ruby-build ]
-  assert [ -x bin/rbenv-install ]
-  assert [ -x bin/rbenv-uninstall ]
+  assert [ -x bin/jlenv-install ]
+  assert [ -x bin/jlenv-uninstall ]
 
   assert [ -e share/ruby-build/1.8.6-p383 ]
   assert [ -e share/ruby-build/ree-1.8.7-2012.02 ]

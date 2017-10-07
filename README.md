@@ -3,8 +3,8 @@
 ruby-build is a command-line utility that makes it easy to install virtually any
 version of Ruby, from source.
 
-It is available as a plugin for [rbenv][] that
-provides the `rbenv install` command, or as a standalone program.
+It is available as a plugin for [jlenv][] that
+provides the `jlenv install` command, or as a standalone program.
 
 ## Installation
 
@@ -12,12 +12,12 @@ provides the `rbenv install` command, or as a standalone program.
 # Using Homebrew on macOS
 $ brew install ruby-build
 
-# As an rbenv plugin
-$ mkdir -p "$(rbenv root)"/plugins
-$ git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
+# As an jlenv plugin
+$ mkdir -p "$(jlenv root)"/plugins
+$ git clone https://github.com/jlenv/ruby-build.git "$(jlenv root)"/plugins/ruby-build
 
 # As a standalone program
-$ git clone https://github.com/rbenv/ruby-build.git
+$ git clone https://github.com/jlenv/ruby-build.git
 $ PREFIX=/usr/local ./ruby-build/install.sh
 ```
 
@@ -27,8 +27,8 @@ $ PREFIX=/usr/local ./ruby-build/install.sh
 # Via Homebrew
 $ brew update && brew upgrade ruby-build
 
-# As an rbenv plugin
-$ cd "$(rbenv root)"/plugins/ruby-build && git pull
+# As an jlenv plugin
+$ cd "$(jlenv root)"/plugins/ruby-build && git pull
 ```
 
 ## Usage
@@ -36,9 +36,9 @@ $ cd "$(rbenv root)"/plugins/ruby-build && git pull
 ### Basic Usage
 
 ```sh
-# As an rbenv plugin
-$ rbenv install --list                 # lists all available versions of Ruby
-$ rbenv install 2.2.0                  # installs Ruby 2.2.0 to ~/.rbenv/versions
+# As an jlenv plugin
+$ jlenv install --list                 # lists all available versions of Ruby
+$ jlenv install 2.2.0                  # installs Ruby 2.2.0 to ~/.jlenv/versions
 
 # As a standalone program
 $ ruby-build --definitions             # lists all available versions of Ruby
@@ -68,7 +68,7 @@ The build process may be configured through the following environment variables:
 | ------------------------ | ------------------------------------------------------------------------------------------------ |
 | `TMPDIR`                 | Where temporary files are stored.                                                                |
 | `RUBY_BUILD_BUILD_PATH`  | Where sources are downloaded and built. (Default: a timestamped subdirectory of `TMPDIR`)        |
-| `RUBY_BUILD_CACHE_PATH`  | Where to cache downloaded package files. (Default: `~/.rbenv/cache` if invoked as rbenv plugin)  |
+| `RUBY_BUILD_CACHE_PATH`  | Where to cache downloaded package files. (Default: `~/.jlenv/cache` if invoked as jlenv plugin)  |
 | `RUBY_BUILD_MIRROR_URL`  | Custom mirror URL root.                                                                          |
 | `RUBY_BUILD_SKIP_MIRROR` | Always download from official sources, not mirrors. (Default: unset)                             |
 | `RUBY_BUILD_ROOT`        | Custom build definition directory. (Default: `share/ruby-build`)                                 |
@@ -85,19 +85,19 @@ The build process may be configured through the following environment variables:
 
 #### Applying Patches
 
-Both `rbenv install` and `ruby-build` support the `--patch` (`-p`) flag to apply
+Both `jlenv install` and `ruby-build` support the `--patch` (`-p`) flag to apply
 a patch to the Ruby (/JRuby/Rubinius) source code before building. Patches are
 read from `STDIN`:
 
 ```sh
 # applying a single patch
-$ rbenv install --patch 1.9.3-p429 < /path/to/ruby.patch
+$ jlenv install --patch 1.9.3-p429 < /path/to/ruby.patch
 
 # applying a patch from HTTP
-$ rbenv install --patch 1.9.3-p429 < <(curl -sSL http://git.io/ruby.patch)
+$ jlenv install --patch 1.9.3-p429 < <(curl -sSL http://git.io/ruby.patch)
 
 # applying multiple patches
-$ cat fix1.patch fix2.patch | rbenv install --patch 1.9.3-p429
+$ cat fix1.patch fix2.patch | jlenv install --patch 1.9.3-p429
 ```
 
 #### Checksum Verification
@@ -130,12 +130,12 @@ The official ruby-build download mirror is sponsored by
 
 #### Keeping the build directory after installation
 
-Both `ruby-build` and `rbenv install` accept the `-k` or `--keep` flag, which
+Both `ruby-build` and `jlenv install` accept the `-k` or `--keep` flag, which
 tells ruby-build to keep the downloaded source after installation. This can be
 useful if you need to use `gdb` and `memprof` with Ruby.
 
-Source code will be kept in a parallel directory tree `~/.rbenv/sources` when
-using `--keep` with the `rbenv install` command. You should specify the
+Source code will be kept in a parallel directory tree `~/.jlenv/sources` when
+using `--keep` with the `jlenv install` command. You should specify the
 location of the source code with the `RUBY_BUILD_BUILD_PATH` environment
 variable when using `--keep` with `ruby-build`.
 
@@ -147,8 +147,8 @@ If you can't find an answer on the wiki, open an issue on the [issue tracker][].
 Be sure to include the full build log for build failures.
 
 
-  [rbenv]: https://github.com/rbenv/rbenv
-  [definitions]: https://github.com/rbenv/ruby-build/tree/master/share/ruby-build
-  [wiki]: https://github.com/rbenv/ruby-build/wiki
-  [build-env]: https://github.com/rbenv/ruby-build/wiki#suggested-build-environment
-  [issue tracker]: https://github.com/rbenv/ruby-build/issues
+  [jlenv]: https://github.com/jlenv/jlenv
+  [definitions]: https://github.com/jlenv/ruby-build/tree/master/share/ruby-build
+  [wiki]: https://github.com/jlenv/ruby-build/wiki
+  [build-env]: https://github.com/jlenv/ruby-build/wiki#suggested-build-environment
+  [issue tracker]: https://github.com/jlenv/ruby-build/issues
