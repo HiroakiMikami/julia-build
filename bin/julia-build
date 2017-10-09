@@ -505,6 +505,14 @@ package_option() {
   eval "$variable=( \"\${value[@]}\" )"
 }
 
+build_package_julia() {
+  local package_name="$1"
+
+  build_package_standard_build $@
+  echo "prefix=${PREFIX_PATH}" > ./Make.user
+  build_package_standard_install $@
+}
+
 build_package_warn_eol() {
   local package_name="$1"
 
