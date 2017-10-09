@@ -13,7 +13,7 @@
 #   --version        Show version of julia-build
 #
 
-JULIA_BUILD_VERSION="20170914"
+JULIA_BUILD_VERSION="20171009"
 
 OLDIFS="$IFS"
 
