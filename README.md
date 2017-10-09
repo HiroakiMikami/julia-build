@@ -1,17 +1,20 @@
+![](https://travis-ci.org/HiroakiMikami/julia-build.svg?branch=master)
+
 # julia-build
 
-julia-build is a command-line utility that makes it easy to install virtually any
-version of Ruby, from source.
+This project was forked from [ruby-build](https://github.com/rbenv/ruby-build), and modified for [julia](https://github.com/JuliaLang/julia).
 
-It is available as a plugin for [jlenv][] that
+---
+
+julia-build is a command-line utility that makes it easy to install virtually any
+version of Julia, from source.
+
+It is available as a plugin for [jlenv](https://github.com/HiroakiMikami/julia-build) that
 provides the `jlenv install` command, or as a standalone program.
 
 ## Installation
 
 ```sh
-# Using Homebrew on macOS
-$ brew install julia-build
-
 # As an jlenv plugin
 $ mkdir -p "$(jlenv root)"/plugins
 $ git clone https://github.com/jlenv/julia-build.git "$(jlenv root)"/plugins/julia-build
@@ -24,9 +27,6 @@ $ PREFIX=/usr/local ./julia-build/install.sh
 ### Upgrading
 
 ```sh
-# Via Homebrew
-$ brew update && brew upgrade julia-build
-
 # As an jlenv plugin
 $ cd "$(jlenv root)"/plugins/julia-build && git pull
 ```
@@ -38,16 +38,16 @@ $ cd "$(jlenv root)"/plugins/julia-build && git pull
 ```sh
 # As an jlenv plugin
 $ jlenv install --list                 # lists all available versions of Ruby
-$ jlenv install 2.2.0                  # installs Ruby 2.2.0 to ~/.jlenv/versions
+$ jlenv install v0.6.0                  # installs Julia v0.6.0 to ~/.jlenv/versions
 
 # As a standalone program
 $ julia-build --definitions             # lists all available versions of Ruby
-$ julia-build 2.2.0 ~/local/julia-2.2.0  # installs Ruby 2.2.0 to ~/local/julia-2.2.0
+$ julia-build 0.6.0 ~/local/julia-v0.6.0  # installs Julia v0.6.0 to ~/local/julia-0.6.0
 ```
 
 julia-build does not check for system dependencies before downloading and
-attempting to compile the Ruby source. Please ensure that [all requisite
-libraries][build-env] are available on your system.
+attempting to compile the Julia source. Please ensure that [all required
+libraries](https://github.com/JuliaLang/julia#required-build-tools-and-external-libraries) are available on your system.
 
 ### Advanced Usage
 
@@ -109,25 +109,6 @@ installing it.
 Checksums are optional and specified as anchors on the package URL in each
 definition. (All bundled definitions include checksums.)
 
-#### Package Mirrors
-
-By default, julia-build downloads package files from a mirror hosted on Amazon
-CloudFront. If a package is not available on the mirror, if the mirror is
-down, or if the download is corrupt, julia-build will fall back to the official
-URL specified in the definition file.
-
-You can point julia-build to another mirror by specifying the
-`JULIA_BUILD_MIRROR_URL` environment variable--useful if you'd like to run your
-own local mirror, for example. Package mirror URLs are constructed by joining
-this variable with the SHA2 checksum of the package file.
-
-If you don't have an SHA2 program installed, julia-build will skip the download
-mirror and use official URLs instead. You can force julia-build to bypass the
-mirror by setting the `JULIA_BUILD_SKIP_MIRROR` environment variable.
-
-The official julia-build download mirror is sponsored by
-[Basecamp](https://basecamp.com/).
-
 #### Keeping the build directory after installation
 
 Both `julia-build` and `jlenv install` accept the `-k` or `--keep` flag, which
@@ -141,14 +122,8 @@ variable when using `--keep` with `julia-build`.
 
 ## Getting Help
 
-Please see the [julia-build wiki][wiki] for solutions to common problems.
+Please see ruby-build wiki for solutions to common problems.
 
-If you can't find an answer on the wiki, open an issue on the [issue tracker][].
-Be sure to include the full build log for build failures.
-
-
-  [jlenv]: https://github.com/jlenv/jlenv
-  [definitions]: https://github.com/jlenv/julia-build/tree/master/share/julia-build
-  [wiki]: https://github.com/jlenv/julia-build/wiki
-  [build-env]: https://github.com/jlenv/julia-build/wiki#suggested-build-environment
-  [issue tracker]: https://github.com/jlenv/julia-build/issues
+  [jlenv]: https://github.com/HiroakiMikami/jlenv
+  [definitions]: https://github.com/HiroakiMikami/julia-build/tree/master/share/julia-build
+  [wiki]: https://github.com/rbenv/ruby-build/wiki
