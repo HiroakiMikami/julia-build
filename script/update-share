@@ -19,7 +19,7 @@ do
     (
         cd $_PWD; \
         cat > ${SHARE_DIRECTORY}/$i <<EOF 
-install_git "julia-$i" "https://github.com/JuliaLang/julia.git" "$i"
+install_git "julia-$i" "https://github.com/JuliaLang/julia.git" "$i" "julia"
 EOF
     )
 done
