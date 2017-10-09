@@ -76,7 +76,7 @@ unstub() {
 run_inline_definition() {
   local definition="${TMP}/build-definition"
   cat > "$definition"
-  run ruby-build "$definition" "${1:-$INSTALL_ROOT}"
+  run julia-build "$definition" "${1:-$INSTALL_ROOT}"
 }
 
 install_fixture() {
@@ -91,7 +91,7 @@ install_fixture() {
   local destination="$2"
   [ -n "$destination" ] || destination="$INSTALL_ROOT"
 
-  run ruby-build $args "$FIXTURE_ROOT/$name" "$destination"
+  run julia-build $args "$FIXTURE_ROOT/$name" "$destination"
 }
 
 assert() {

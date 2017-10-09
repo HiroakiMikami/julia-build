@@ -1,14 +1,14 @@
 #!/usr/bin/env bats
 
 load test_helper
-export RUBY_BUILD_SKIP_MIRROR=1
-export RUBY_BUILD_CACHE_PATH=
-export RUBY_BUILD_ARIA2_OPTS=
+export JULIA_BUILD_SKIP_MIRROR=1
+export JULIA_BUILD_CACHE_PATH=
+export JULIA_BUILD_ARIA2_OPTS=
 
 setup() {
   ensure_not_found_in_path aria2c
-  export RUBY_BUILD_BUILD_PATH="${TMP}/source"
-  mkdir -p "${RUBY_BUILD_BUILD_PATH}"
+  export JULIA_BUILD_BUILD_PATH="${TMP}/source"
+  mkdir -p "${JULIA_BUILD_BUILD_PATH}"
 }
 
 @test "failed download displays error message" {
@@ -50,7 +50,7 @@ OUT
 }
 
 @test "updating existing git repository" {
-  mkdir -p "${RUBY_BUILD_BUILD_PATH}/package-dev"
+  mkdir -p "${JULIA_BUILD_BUILD_PATH}/package-dev"
   stub git \
     "fetch --depth 1 origin +master : true" \
     "checkout -q -B master origin/master : true"

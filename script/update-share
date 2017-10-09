@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Usage: update-share <GIT_REPOSITORY> <SHARE_DIRECTORY>
+#
+# Update a share directory using Git tags
+set -e
+
+GIT_REPOSITORY=$1
+SHARE_DIRECTORY=$2
+
+_PWD=$(pwd)
+
+TEMP_DIR=$(mktemp -d)
+pushd ${TEMP_DIR}
+
+git clone --depth 1 ${GIT_REPOSITORY} ./julia
+pushd julia
+for i in $(git ls-remote --tags | sed -e 's|.*refs/tags/\(.*\)$|\1|')
+do
+    (
+        cd $_PWD; \
+        cat > ${SHARE_DIRECTORY}/$i <<EOF 
+install_git "julia-$i" "https://github.com/JuliaLang/julia.git" "$i"
+EOF
+    )
+done
+
+popd
+popd

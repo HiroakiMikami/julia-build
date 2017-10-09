@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
 
 load test_helper
-export RUBY_BUILD_SKIP_MIRROR=1
-export RUBY_BUILD_CACHE_PATH=
-export RUBY_BUILD_CURL_OPTS=
+export JULIA_BUILD_SKIP_MIRROR=1
+export JULIA_BUILD_CACHE_PATH=
+export JULIA_BUILD_CURL_OPTS=
 
 setup() {
   ensure_not_found_in_path aria2c
@@ -110,11 +110,11 @@ setup() {
   stub curl false
   stub wget false
 
-  export -n RUBY_BUILD_CACHE_PATH
-  export RUBY_BUILD_BUILD_PATH="${TMP}/build"
+  export -n JULIA_BUILD_CACHE_PATH
+  export JULIA_BUILD_BUILD_PATH="${TMP}/build"
 
-  mkdir -p "$RUBY_BUILD_BUILD_PATH"
-  ln -s "${FIXTURE_ROOT}/package-1.0.0.tar.gz" "$RUBY_BUILD_BUILD_PATH"
+  mkdir -p "$JULIA_BUILD_BUILD_PATH"
+  ln -s "${FIXTURE_ROOT}/package-1.0.0.tar.gz" "$JULIA_BUILD_BUILD_PATH"
 
   run_inline_definition <<DEF
 install_package "package-1.0.0" "http://example.com/packages/package-1.0.0.tar.gz#ba988b1bb4250dee0b9dd3d4d722f9c64b2bacfc805d1b6eba7426bda72dd3c5" copy
@@ -132,11 +132,11 @@ DEF
     "echo ba988b1bb4250dee0b9dd3d4d722f9c64b2bacfc805d1b6eba7426bda72dd3c5"
   stub curl "-q -o * -*S* http://example.com/* : cp $FIXTURE_ROOT/\${5##*/} \$3"
 
-  export -n RUBY_BUILD_CACHE_PATH
-  export RUBY_BUILD_BUILD_PATH="${TMP}/build"
+  export -n JULIA_BUILD_CACHE_PATH
+  export JULIA_BUILD_BUILD_PATH="${TMP}/build"
 
-  mkdir -p "$RUBY_BUILD_BUILD_PATH"
-  touch "${RUBY_BUILD_BUILD_PATH}/package-1.0.0.tar.gz"
+  mkdir -p "$JULIA_BUILD_BUILD_PATH"
+  touch "${JULIA_BUILD_BUILD_PATH}/package-1.0.0.tar.gz"
 
   run_inline_definition <<DEF
 install_package "package-1.0.0" "http://example.com/packages/package-1.0.0.tar.gz#ba988b1bb4250dee0b9dd3d4d722f9c64b2bacfc805d1b6eba7426bda72dd3c5" copy

@@ -2,22 +2,22 @@
 
 load test_helper
 
-@test "not enough arguments for ruby-build" {
+@test "not enough arguments for julia-build" {
   # use empty inline definition so nothing gets built anyway
   local definition="${TMP}/build-definition"
   echo '' > "$definition"
 
-  run ruby-build "$definition"
+  run julia-build "$definition"
   assert_failure
-  assert_output_contains 'Usage: ruby-build'
+  assert_output_contains 'Usage: julia-build'
 }
 
-@test "extra arguments for ruby-build" {
+@test "extra arguments for julia-build" {
   # use empty inline definition so nothing gets built anyway
   local definition="${TMP}/build-definition"
   echo '' > "$definition"
 
-  run ruby-build "$definition" "${TMP}/install" ""
+  run julia-build "$definition" "${TMP}/install" ""
   assert_failure
-  assert_output_contains 'Usage: ruby-build'
+  assert_output_contains 'Usage: julia-build'
 }

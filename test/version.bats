@@ -2,31 +2,31 @@
 
 load test_helper
 
-bats_bin="${BATS_TEST_DIRNAME}/../bin/ruby-build"
+bats_bin="${BATS_TEST_DIRNAME}/../bin/julia-build"
 static_version="$(grep VERSION "$bats_bin" | head -1 | cut -d'"' -f 2)"
 
-@test "ruby-build static version" {
+@test "julia-build static version" {
   stub git 'echo "ASPLODE" >&2; exit 1'
-  run ruby-build --version
-  assert_success "ruby-build ${static_version}"
+  run julia-build --version
+  assert_success "julia-build ${static_version}"
   unstub git
 }
 
-@test "ruby-build git version" {
+@test "julia-build git version" {
   stub git \
-    'remote -v : echo origin https://github.com/rbenv/ruby-build.git' \
+    'remote -v : echo origin https://github.com/jlenv/julia-build.git' \
     "describe --tags HEAD : echo v1984-12-gSHA"
-  run ruby-build --version
-  assert_success "ruby-build 1984-12-gSHA"
+  run julia-build --version
+  assert_success "julia-build 1984-12-gSHA"
   unstub git
 }
 
 @test "git describe fails" {
   stub git \
-    'remote -v : echo origin https://github.com/rbenv/ruby-build.git' \
+    'remote -v : echo origin https://github.com/jlenv/julia-build.git' \
     "describe --tags HEAD : echo ASPLODE >&2; exit 1"
-  run ruby-build --version
-  assert_success "ruby-build ${static_version}"
+  run julia-build --version
+  assert_success "julia-build ${static_version}"
   unstub git
 }
 
@@ -34,6 +34,6 @@ static_version="$(grep VERSION "$bats_bin" | head -1 | cut -d'"' -f 2)"
   stub git \
     'remote -v : echo origin https://github.com/Homebrew/homebrew.git' \
     "describe --tags HEAD : echo v1984-12-gSHA"
-  run ruby-build --version
-  assert_success "ruby-build ${static_version}"
+  run julia-build --version
+  assert_success "julia-build ${static_version}"
 }

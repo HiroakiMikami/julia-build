@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+#
+# Summary: Install a Ruby version using julia-build
+#
+# Usage: jlenv install [-f|-s] [-kpv] <version>
+#        jlenv install [-f|-s] [-kpv] <definition-file>
+#        jlenv install -l|--list
+#        jlenv install --version
+#
+#   -l/--list          List all available versions
+#   -f/--force         Install even if the version appears to be installed already
+#   -s/--skip-existing Skip if the version appears to be installed already
+#
+#   julia-build options:
+#
+#   -k/--keep          Keep source tree in $JLENV_BUILD_ROOT after installation
+#                      (defaults to $JLENV_ROOT/sources)
+#   -p/--patch         Apply a patch from stdin before building
+#   -v/--verbose       Verbose mode: print compilation status to stdout
+#   --version          Show version of julia-build
+#
+# For detailed information on installing Ruby versions with
+# julia-build, including a list of environment variables for adjusting
+# compilation, see: https://github.com/jlenv/julia-build#usage
+#
+set -e
+[ -n "$JLENV_DEBUG" ] && set -x
+
+# Add `share/julia-build/` directory from each jlenv plugin to the list of
+# paths where build definitions are looked up.
+shopt -s nullglob
+for plugin_path in "$JLENV_ROOT"/plugins/*/share/julia-build; do
+  JULIA_BUILD_DEFINITIONS="${JULIA_BUILD_DEFINITIONS}:${plugin_path}"
+done
+export JULIA_BUILD_DEFINITIONS
+shopt -u nullglob
+
+# Provide jlenv completions
+if [ "$1" = "--complete" ]; then
+  echo --list
+  echo --force
+  echo --skip-existing
+  echo --keep
+  echo --patch
+  echo --verbose
+  echo --version
+  exec julia-build --definitions
+fi
+
+# Load shared library functions
+eval "$(julia-build --lib)"
+
+usage() {
+  jlenv-help install 2>/dev/null
+  [ -z "$1" ] || exit "$1"
+}
+
+definitions() {
+  local query="$1"
+  julia-build --definitions | $(type -p ggrep grep | head -1) -F "$query" || true
+}
+
+indent() {
+  sed 's/^/  /'
+}
+
+unset FORCE
+unset SKIP_EXISTING
+unset KEEP
+unset VERBOSE
+unset HAS_PATCH
+
+parse_options "$@"
+for option in "${OPTIONS[@]}"; do
+  case "$option" in
+  "h" | "help" )
+    usage 0
+    ;;
+  "l" | "list" )
+    echo "Available versions:"
+    definitions | indent
+    exit
+    ;;
+  "f" | "force" )
+    FORCE=true
+    ;;
+  "s" | "skip-existing" )
+    SKIP_EXISTING=true
+    ;;
+  "k" | "keep" )
+    [ -n "${JLENV_BUILD_ROOT}" ] || JLENV_BUILD_ROOT="${JLENV_ROOT}/sources"
+    ;;
+  "v" | "verbose" )
+    VERBOSE="-v"
+    ;;
+  "p" | "patch" )
+    HAS_PATCH="-p"
+    ;;
+  "version" )
+    exec julia-build --version
+    ;;
+  * )
+    usage 1 >&2
+    ;;
+  esac
+done
+
+[ "${#ARGUMENTS[@]}" -le 1 ] || usage 1 >&2
+
+unset VERSION_NAME
+
+# The first argument contains the definition to install. If the
+# argument is missing, try to install whatever local app-specific
+# version is specified by jlenv. Show usage instructions if a local
+# version is not specified.
+DEFINITION="${ARGUMENTS[0]}"
+[ -n "$DEFINITION" ] || DEFINITION="$(jlenv-local 2>/dev/null || true)"
+[ -n "$DEFINITION" ] || usage 1 >&2
+
+# Define `before_install` and `after_install` functions that allow
+# plugin hooks to register a string of code for execution before or
+# after the installation process.
+declare -a before_hooks after_hooks
+
+before_install() {
+  local hook="$1"
+  before_hooks["${#before_hooks[@]}"]="$hook"
+}
+
+after_install() {
+  local hook="$1"
+  after_hooks["${#after_hooks[@]}"]="$hook"
+}
+
+OLDIFS="$IFS"
+IFS=$'\n' scripts=(`jlenv-hooks install`)
+IFS="$OLDIFS"
+for script in "${scripts[@]}"; do source "$script"; done
+
+
+# Set VERSION_NAME from $DEFINITION, if it is not already set. Then
+# compute the installation prefix.
+[ -n "$VERSION_NAME" ] || VERSION_NAME="${DEFINITION##*/}"
+PREFIX="${JLENV_ROOT}/versions/${VERSION_NAME}"
+
+[ -d "${PREFIX}" ] && PREFIX_EXISTS=1
+
+# If the installation prefix exists, prompt for confirmation unless
+# the --force option was specified.
+if [ -d "${PREFIX}/bin" ]; then
+  if [ -z "$FORCE" ] && [ -z "$SKIP_EXISTING" ]; then
+    echo "jlenv: $PREFIX already exists" >&2
+    read -p "continue with installation? (y/N) "
+
+    case "$REPLY" in
+    y* | Y* ) ;;
+    * ) exit 1 ;;
+    esac
+  elif [ -n "$SKIP_EXISTING" ]; then
+    # Since we know the julia version is already installed, and are opting to
+    # not force installation of existing versions, we just `exit 0` here to
+    # leave things happy
+    exit 0
+  fi
+fi
+
+# If JLENV_BUILD_ROOT is set, always pass keep options to julia-build.
+if [ -n "${JLENV_BUILD_ROOT}" ]; then
+  export JULIA_BUILD_BUILD_PATH="${JLENV_BUILD_ROOT}/${VERSION_NAME}"
+  KEEP="-k"
+fi
+
+# Set JULIA_BUILD_CACHE_PATH to $JLENV_ROOT/cache, if the directory
+# exists and the variable is not already set.
+if [ -z "${JULIA_BUILD_CACHE_PATH}" ] && [ -d "${JLENV_ROOT}/cache" ]; then
+  export JULIA_BUILD_CACHE_PATH="${JLENV_ROOT}/cache"
+fi
+
+# Default JLENV_VERSION to the globally-specified Ruby version. (The
+# REE installer requires an existing Ruby installation to run. An
+# unsatisfied local .julia-version file can cause the installer to
+# fail.)
+export JLENV_VERSION="$(jlenv-global 2>/dev/null || true)"
+
+
+# Execute `before_install` hooks.
+for hook in "${before_hooks[@]}"; do eval "$hook"; done
+
+# Plan cleanup on unsuccessful installation.
+cleanup() {
+  [ -z "${PREFIX_EXISTS}" ] && rm -rf "$PREFIX"
+}
+
+trap cleanup SIGINT
+
+# Invoke `julia-build` and record the exit status in $STATUS.
+STATUS=0
+julia-build $KEEP $VERBOSE $HAS_PATCH "$DEFINITION" "$PREFIX" || STATUS="$?"
+
+# Display a more helpful message if the definition wasn't found.
+if [ "$STATUS" == "2" ]; then
+  { candidates="$(definitions "$DEFINITION")"
+    here="$(dirname "${0%/*}")"
+    if [ -n "$candidates" ]; then
+      echo
+      echo "The following versions contain \`$DEFINITION' in the name:"
+      echo "$candidates" | indent
+    fi
+    echo
+    echo "See all available versions with \`jlenv install --list'."
+    echo
+    echo -n "If the version you need is missing, try upgrading julia-build"
+    if [ "$here" != "${here#$(brew --prefix 2>/dev/null)}" ]; then
+      printf ":\n\n"
+      echo "  brew update && brew upgrade julia-build"
+    elif [ -d "${here}/.git" ]; then
+      printf ":\n\n"
+      echo "  cd ${here} && git pull && cd -"
+    else
+      printf ".\n"
+    fi
+  } >&2
+fi
+
+# Execute `after_install` hooks.
+for hook in "${after_hooks[@]}"; do eval "$hook"; done
+
+# Run `jlenv-rehash` after a successful installation.
+if [ "$STATUS" == "0" ]; then
+  jlenv-rehash
+else
+  cleanup
+fi
+
+exit "$STATUS"
