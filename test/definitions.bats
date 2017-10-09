@@ -6,8 +6,8 @@ NUM_DEFINITIONS="$(ls "$BATS_TEST_DIRNAME"/../share/julia-build | wc -l)"
 @test "list built-in definitions" {
   run julia-build --definitions
   assert_success
-  assert_output_contains "1.9.3-p194"
-  assert_output_contains "jjulia-1.7.9"
+  assert_output_contains "v0.6.0"
+  assert_output_contains "v0.6.0-rc1"
   assert [ "${#lines[*]}" -eq "$NUM_DEFINITIONS" ]
 }
 

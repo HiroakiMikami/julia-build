@@ -13,8 +13,7 @@ load test_helper
   assert [ -x bin/jlenv-install ]
   assert [ -x bin/jlenv-uninstall ]
 
-  assert [ -e share/julia-build/1.8.6-p383 ]
-  assert [ -e share/julia-build/ree-1.8.7-2012.02 ]
+  assert [ -e share/julia-build/v0.6.0 ]
 }
 
 @test "build definitions don't have the executable bit" {
@@ -33,13 +32,13 @@ OUT
   cd "$TMP"
   mkdir -p bin share/julia-build
   touch bin/julia-build
-  touch share/julia-build/1.8.6-p383
+  touch share/julia-build/v0.6.0
 
   PREFIX="$PWD" run "${BATS_TEST_DIRNAME}/../install.sh"
   assert_success ""
 
   assert [ -x bin/julia-build ]
-  run grep "install_package" share/julia-build/1.8.6-p383
+  run grep "install_git" share/julia-build/v0.6.0
   assert_success
 }
 
