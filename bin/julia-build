@@ -350,12 +350,6 @@ fetch_tarball() {
   if [ "$package_url" != "${package_url/\#}" ]; then
     checksum="${package_url#*#}"
     package_url="${package_url%%#*}"
-
-    if [ -n "$JULIA_BUILD_MIRROR_URL" ]; then
-      if [[ -z "$JULIA_BUILD_DEFAULT_MIRROR" || $package_url != */cache.julia-lang.org/* ]]; then
-        mirror_url="${JULIA_BUILD_MIRROR_URL}/$checksum"
-      fi
-    fi
   fi
 
   local tar_args="xzf"
@@ -1286,18 +1280,6 @@ if [ -n "$JULIA_BUILD_CACHE_PATH" ] && [ -d "$JULIA_BUILD_CACHE_PATH" ]; then
   JULIA_BUILD_CACHE_PATH="${JULIA_BUILD_CACHE_PATH%/}"
 else
   unset JULIA_BUILD_CACHE_PATH
-fi
-
-if [ -z "$JULIA_BUILD_MIRROR_URL" ]; then
-  JULIA_BUILD_MIRROR_URL="https://dqw8nmjcqpjn7.cloudfront.net"
-  JULIA_BUILD_DEFAULT_MIRROR=1
-else
-  JULIA_BUILD_MIRROR_URL="${JULIA_BUILD_MIRROR_URL%/}"
-  JULIA_BUILD_DEFAULT_MIRROR=
-fi
-
-if [ -n "$JULIA_BUILD_SKIP_MIRROR" ] || ! has_checksum_support compute_sha2; then
-  unset JULIA_BUILD_MIRROR_URL
 fi
 
 ARIA2_OPTS="${JULIA_BUILD_ARIA2_OPTS} ${IPV4+--disable-ipv6=true} ${IPV6+--disable-ipv6=false}"
