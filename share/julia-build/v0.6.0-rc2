@@ -1,1 +1,1 @@
-install_git "julia-v0.6.0-rc2" "https://github.com/JuliaLang/julia.git" "v0.6.0-rc2"
+install_git "julia-v0.6.0-rc2" "https://github.com/JuliaLang/julia.git" "v0.6.0-rc2" "julia"
