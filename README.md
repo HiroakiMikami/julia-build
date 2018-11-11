@@ -17,10 +17,10 @@ provides the `jlenv install` command, or as a standalone program.
 ```sh
 # As an jlenv plugin
 $ mkdir -p "$(jlenv root)"/plugins
-$ git clone https://github.com/jlenv/julia-build.git "$(jlenv root)"/plugins/julia-build
+$ git clone https://github.com/HiroakiMikami/julia-build.git "$(jlenv root)"/plugins/julia-build
 
 # As a standalone program
-$ git clone https://github.com/jlenv/julia-build.git
+$ git clone https://github.com/HiroakiMikami/julia-build.git
 $ PREFIX=/usr/local ./julia-build/install.sh
 ```
 
