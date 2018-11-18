@@ -37,11 +37,11 @@ $ cd "$(jlenv root)"/plugins/julia-build && git pull
 
 ```sh
 # As an jlenv plugin
-$ jlenv install --list                 # lists all available versions of Ruby
+$ jlenv install --list                 # lists all available versions of Julia
 $ jlenv install v0.6.0                  # installs Julia v0.6.0 to ~/.jlenv/versions
 
 # As a standalone program
-$ julia-build --definitions             # lists all available versions of Ruby
+$ julia-build --definitions             # lists all available versions of Julia
 $ julia-build 0.6.0 ~/local/julia-v0.6.0  # installs Julia v0.6.0 to ~/local/julia-0.6.0
 ```
 
@@ -53,9 +53,9 @@ libraries](https://github.com/JuliaLang/julia#required-build-tools-and-external-
 
 #### Custom Build Definitions
 
-If you wish to develop and install a version of Ruby that is not yet supported
+If you wish to develop and install a version of Julia that is not yet supported
 by julia-build, you may specify the path to a custom “build definition file” in
-place of a Ruby version number.
+place of a Julia version number.
 
 Use the [default build definitions][definitions] as a template for your custom
 definitions.
@@ -79,14 +79,14 @@ The build process may be configured through the following environment variables:
 | `MAKE`                   | Custom `make` command (_e.g.,_ `gmake`).                                                         |
 | `MAKE_OPTS` / `MAKEOPTS` | Additional `make` options.                                                                       |
 | `MAKE_INSTALL_OPTS`      | Additional `make install` options.                                                               |
-| `JULIA_CONFIGURE_OPTS`    | Additional `./configure` options (applies only to Ruby source).                                  |
-| `JULIA_MAKE_OPTS`         | Additional `make` options (applies only to Ruby source).                                         |
-| `JULIA_MAKE_INSTALL_OPTS` | Additional `make install` options (applies only to Ruby source).                                 |
+| `JULIA_CONFIGURE_OPTS`    | Additional `./configure` options (applies only to Julia source).                                 |
+| `JULIA_MAKE_OPTS`         | Additional `make` options (applies only to Julia source).                                        |
+| `JULIA_MAKE_INSTALL_OPTS` | Additional `make install` options (applies only to Julia source).                                |
 
 #### Applying Patches
 
 Both `jlenv install` and `julia-build` support the `--patch` (`-p`) flag to apply
-a patch to the Ruby (/JRuby/Rubinius) source code before building. Patches are
+a patch to the Julia source code before building. Patches are
 read from `STDIN`:
 
 ```sh
@@ -113,7 +113,7 @@ definition. (All bundled definitions include checksums.)
 
 Both `julia-build` and `jlenv install` accept the `-k` or `--keep` flag, which
 tells julia-build to keep the downloaded source after installation. This can be
-useful if you need to use `gdb` and `memprof` with Ruby.
+useful if you need to use `gdb` and `memprof` with Julia.
 
 Source code will be kept in a parallel directory tree `~/.jlenv/sources` when
 using `--keep` with the `jlenv install` command. You should specify the
@@ -122,8 +122,8 @@ variable when using `--keep` with `julia-build`.
 
 ## Getting Help
 
-Please see ruby-build wiki for solutions to common problems.
+Please see Julia-Build wiki for solutions to common problems.
 
   [jlenv]: https://github.com/HiroakiMikami/jlenv
   [definitions]: https://github.com/HiroakiMikami/julia-build/tree/master/share/julia-build
-  [wiki]: https://github.com/rbenv/ruby-build/wiki
+  [wiki]: https://github.com/HiroakiMikami/julia-build/wiki
