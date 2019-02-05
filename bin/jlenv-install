@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Summary: Install a Ruby version using julia-build
+# Summary: Install a Julia version using julia-build
 #
 # Usage: jlenv install [-f|-s] [-kpv] <version>
 #        jlenv install [-f|-s] [-kpv] <definition-file>
@@ -19,7 +19,7 @@
 #   -v/--verbose       Verbose mode: print compilation status to stdout
 #   --version          Show version of julia-build
 #
-# For detailed information on installing Ruby versions with
+# For detailed information on installing Julia versions with
 # julia-build, including a list of environment variables for adjusting
 # compilation, see: https://github.com/jlenv/julia-build#usage
 #
@@ -176,8 +176,8 @@ if [ -z "${JULIA_BUILD_CACHE_PATH}" ] && [ -d "${JLENV_ROOT}/cache" ]; then
   export JULIA_BUILD_CACHE_PATH="${JLENV_ROOT}/cache"
 fi
 
-# Default JLENV_VERSION to the globally-specified Ruby version. (The
-# REE installer requires an existing Ruby installation to run. An
+# Default JLENV_VERSION to the globally-specified Julia version. (The
+# REE installer requires an existing Julia installation to run. An
 # unsatisfied local .julia-version file can cause the installer to
 # fail.)
 export JLENV_VERSION="$(jlenv-global 2>/dev/null || true)"

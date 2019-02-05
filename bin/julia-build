@@ -670,10 +670,7 @@ require_gcc() {
         echo "as of version 4.2. Instead, the \`gcc\` executable is a symlink to"
         echo "\`llvm-gcc\`, a modified version of GCC which outputs LLVM bytecode."
         echo
-        echo "For most programs the \`llvm-gcc\` compiler works fine. However,"
-        echo "versions of Ruby older than 1.9.3-p125 are incompatible with"
-        echo "\`llvm-gcc\`. To build older versions of Ruby you must have the official"
-        echo "GCC compiler installed on your system."
+        echo "For most programs the \`llvm-gcc\` compiler works fine."
         echo
 
         colorize 1 "TO FIX THE PROBLEM"
@@ -690,7 +687,7 @@ require_gcc() {
         echo
         echo
         echo "You will need to install the official GCC compiler to build older"
-        echo "versions of Ruby even if you have installed Apple's Command Line Tools"
+        echo "versions of Julia even if you have installed Apple's Command Line Tools"
         echo "for Xcode package. The Command Line Tools for Xcode package only"
         echo "includes \`llvm-gcc\`."
       fi
@@ -877,7 +874,7 @@ build_package_mac_openssl() {
   # Put openssl.conf, certs, etc in ~/.jlenv/versions/*/openssl/ssl
   OPENSSLDIR="${OPENSSLDIR:-$OPENSSL_PREFIX_PATH/ssl}"
 
-  # Tell Ruby to use this openssl for its extension.
+  # Tell Julia to use this openssl for its extension.
   package_option julia configure --with-openssl-dir="$OPENSSL_PREFIX_PATH"
 
   # Hint OpenSSL that we prefer a 64-bit build.
@@ -920,12 +917,12 @@ build_package_verify_openssl() {
       begin
         require lib
       rescue LoadError
-        $stderr.puts "The Ruby #{lib} extension was not compiled."
+        $stderr.puts "The Julia #{lib} extension was not compiled."
       end
     end
 
     if failed.size > 0
-      $stderr.puts "ERROR: Ruby install aborted due to missing extensions"
+      $stderr.puts "ERROR: Julia install aborted due to missing extensions"
       $stderr.print "Try running `%s install -y %s` to fetch missing dependencies.\n\n" % [
         manager,
         failed.map { |lib| packages.fetch(manager)[lib] }.join(" ")
