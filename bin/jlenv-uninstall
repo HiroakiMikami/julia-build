@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Summary: Uninstall a specific Ruby version
+# Summary: Uninstall a specific Julia version
 #
 # Usage: jlenv uninstall [-f|--force] <version>
 #
