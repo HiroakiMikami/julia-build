@@ -65,7 +65,7 @@ NUM_DEFINITIONS="$(ls "$BATS_TEST_DIRNAME"/../share/julia-build | wc -l)"
   assert_output "julia-build: definition not found: nonexistent"
 }
 
-@test "sorting Ruby versions" {
+@test "sorting Julia versions" {
   export JULIA_BUILD_ROOT="$TMP"
   mkdir -p "${JULIA_BUILD_ROOT}/share/julia-build"
   expected="1.8.7
@@ -98,7 +98,7 @@ jjulia-9000"
   assert_success "$expected"
 }
 
-@test "removing duplicate Ruby versions" {
+@test "removing duplicate Julia versions" {
   export JULIA_BUILD_ROOT="$TMP"
   export JULIA_BUILD_DEFINITIONS="${JULIA_BUILD_ROOT}/share/julia-build"
   mkdir -p "$JULIA_BUILD_DEFINITIONS"
