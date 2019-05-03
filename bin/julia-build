@@ -13,7 +13,7 @@
 #   --version        Show version of julia-build
 #
 
-JULIA_BUILD_VERSION="20171009"
+JULIA_BUILD_VERSION="20190425"
 
 OLDIFS="$IFS"
 
@@ -153,8 +153,12 @@ num_cpu_cores() {
   Darwin | *BSD )
     num="$(sysctl -n hw.ncpu 2>/dev/null || true)"
     ;;
+  SunOS )
+    num="$(getconf NPROCESSORS_ONLN 2>/dev/null || true)"
+    ;;
   * )
-    num="$(grep ^processor /proc/cpuinfo 2>/dev/null | wc -l | xargs)"
+    num="$({ getconf _NPROCESSORS_ONLN ||
+             grep -c ^processor /proc/cpuinfo; } 2>/dev/null)"
     num="${num#0}"
     ;;
   esac
@@ -296,21 +300,28 @@ verify_checksum() {
 
 http() {
   local method="$1"
-  local url="$2"
-  local file="$3"
-  [ -n "$url" ] || return 1
 
-  if type aria2c &>/dev/null; then
-    "http_${method}_aria2c" "$url" "$file"
-  elif type curl &>/dev/null; then
-    "http_${method}_curl" "$url" "$file"
-  elif type wget &>/dev/null; then
-    "http_${method}_wget" "$url" "$file"
-  else
-    echo "error: please install \`aria2c\`, \`curl\` or \`wget\` and try again" >&2
-    exit 1
-  fi
+  [ -n "$2" ] || return 1
+  shift 1
+
+  JULIA_BUILD_HTTP_CLIENT="${JULIA_BUILD_HTTP_CLIENT:-$(detect_http_client)}"
+  [ -n "$JULIA_BUILD_HTTP_CLIENT" ] || return 1
+
+  "http_${method}_${JULIA_BUILD_HTTP_CLIENT}" "$@"
 }
+
+detect_http_client() {
+  local client
+  for client in aria2c curl wget; do
+    if type "$client" &>/dev/null; then
+      echo "$client"
+      return
+     fi
+  done
+  echo "error: please install \`aria2c\`, \`curl\`, or \`wget\` and try again" >&2
+  return 1
+}
+
 
 http_head_aria2c() {
   aria2c --dry-run --no-conf=true ${ARIA2_OPTS} "$1" >&4 2>&1
@@ -346,6 +357,7 @@ fetch_tarball() {
   local package_url="$2"
   local mirror_url
   local checksum
+  local extracted_dir
 
   if [ "$package_url" != "${package_url/\#}" ]; then
     checksum="${package_url#*#}"
@@ -364,7 +376,7 @@ fetch_tarball() {
   fi
 
   if ! reuse_existing_tarball "$package_filename" "$checksum"; then
-    local tarball_filename=$(basename $package_url)
+    local tarball_filename="$(basename "$package_url")"
     echo "Downloading ${tarball_filename}..." >&2
     http head "$mirror_url" &&
     download_tarball "$mirror_url" "$package_filename" "$checksum" ||
@@ -372,6 +384,11 @@ fetch_tarball() {
   fi
 
   { if tar $tar_args "$package_filename"; then
+      if [ ! -d "$package_name" ]; then
+        extracted_dir="$(find_extracted_directory)"
+        mv "$extracted_dir" "$package_name"
+      fi
+
       if [ -z "$KEEP_BUILD_PATH" ]; then
         rm -f "$package_filename"
       else
@@ -379,6 +396,17 @@ fetch_tarball() {
       fi
     fi
   } >&4 2>&1
+}
+
+find_extracted_directory() {
+  for f in *; do
+    if [ -d "$f" ]; then
+      echo "$f"
+      return
+    fi
+  done
+  echo "Extracted directory not found" >&2
+  return 1
 }
 
 reuse_existing_tarball() {
@@ -675,9 +703,9 @@ require_gcc() {
 
         colorize 1 "TO FIX THE PROBLEM"
         if type brew &>/dev/null; then
-          echo ": Install Homebrew's apple-gcc42 package with this"
+          echo ": Install Homebrew's GCC package with this"
           echo -n "command: "
-          colorize 4 "brew tap homebrew/dupes ; brew install apple-gcc42"
+          colorize 4 "brew install apple-gcc42"
         else
           echo ": Install the official GCC compiler using these"
           echo -n "packages: "
@@ -876,6 +904,9 @@ build_package_mac_openssl() {
 
   # Tell Julia to use this openssl for its extension.
   package_option julia configure --with-openssl-dir="$OPENSSL_PREFIX_PATH"
+
+  # Make sure pkg-config finds our build first.
+  export PKG_CONFIG_PATH="${OPENSSL_PREFIX_PATH}/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 
   # Hint OpenSSL that we prefer a 64-bit build.
   export KERNEL_BITS="64"
