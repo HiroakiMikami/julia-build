@@ -1,0 +1,1 @@
+install_git "julia-v1.5.0" "https://github.com/JuliaLang/julia.git" "v1.5.0" "julia"
